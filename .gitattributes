@@ -1,0 +1,30 @@
+# 统一换行符：仓库内一律 LF，检出时按平台转换
+* text=auto eol=lf
+
+# Shell / Python 脚本必须是 LF，否则在 Linux / macOS 上会因 CRLF 报 exec format error
+*.sh    text eol=lf
+*.py    text eol=lf
+gradlew text eol=lf
+
+# Windows 批处理必须是 CRLF
+*.bat       text eol=crlf
+gradlew.bat text eol=crlf
+
+# 二进制文件：不做换行符转换，diff 也不显示内容
+*.png   binary
+*.jpg   binary
+*.jar   binary
+*.apk   binary
+*.jks   binary
+*.keystore binary
+*.db    binary
+*.zip   binary
+*.whl   binary
+
+# 语言统计：设计文档与 README 不计入代码行数
+docs/** linguist-documentation
+*.md    linguist-documentation
+
+# 词库随应用分发，不是源码
+app/src/main/assets/dict.db linguist-vendored
+app/src/main/assets/web/index.html linguist-vendored

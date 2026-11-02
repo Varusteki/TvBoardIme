@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 基类用系统 Material（API 21 起可用），不引入 AppCompat -->
+    <style name="Theme.TvBoard" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg_ime</item>
+        <item name="android:colorAccent">@color/focus</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:statusBarColor">@color/bg_ime</item>
+        <item name="android:navigationBarColor">@color/bg_ime</item>
+    </style>
+
+    <!-- 设置页按钮：必须给焦点态，TV 上焦点高亮是唯一的位置指示 -->
+    <style name="Widget.TvBoard.Button" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/bg_settings_button</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+</resources>

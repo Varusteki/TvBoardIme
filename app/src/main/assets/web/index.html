@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14161a">
+<title>TV 跨屏输入</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1c1f26;
+    --key: #2a2f38;
+    --line: #2e343e;
+    --text: #f2f4f8;
+    --muted: #9aa3b2;
+    --accent: #4c9aff;
+    --ok: #2fbf71;
+    --warn: #e8a33d;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    padding: 16px max(16px, env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom));
+    max-width: 680px; margin: 0 auto;
+  }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.ok { background: var(--ok); }
+  .dot.warn { background: var(--warn); }
+  .dot.bad { background: #e2574c; }
+  h1 { font-size: 17px; font-weight: 500; margin: 0; flex: 1; }
+  .sub { font-size: 12px; color: var(--muted); }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px; margin-bottom: 14px;
+  }
+  textarea {
+    width: 100%; min-height: 120px; resize: vertical;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; font-size: 16px; line-height: 1.5;
+    font-family: inherit; outline: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  .row { display: flex; gap: 10px; margin-top: 10px; }
+  button {
+    flex: 1; min-height: 48px; border: 0; border-radius: 8px;
+    font-size: 16px; font-family: inherit; font-weight: 500;
+    background: var(--accent); color: #0b1220; cursor: pointer;
+  }
+  button:disabled { background: var(--key); color: var(--muted); cursor: not-allowed; }
+  /* 控制键：功能与"发送"不同，用次级配色，避免和主按钮抢注意力 */
+  .ctrl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .ctrl button {
+    min-height: 54px; font-size: 19px; font-weight: 500;
+    background: var(--key); color: var(--text); border: 1px solid var(--line);
+  }
+  .ctrl button:active { background: #343b47; }
+  .ctrl button.danger { color: #ff9b8a; }
+  .ctrl button:disabled { opacity: .4; background: var(--key); color: var(--muted); }
+  .card-title {
+    font-size: 13px; color: var(--muted); margin: 0 0 10px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .hint.warn { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="dot" id="dot"></span>
+  <h1>TV 跨屏输入</h1>
+  <span class="sub" id="device"></span>
+</header>
+
+<div class="card">
+  <textarea id="text" placeholder="在这里输入文字，点发送即写入电视当前输入框"></textarea>
+  <div class="row">
+    <button id="send">发送到电视</button>
+  </div>
+  <div class="hint" id="hint">正在读取电视状态…</div>
+</div>
+
+<div class="card">
+  <p class="card-title"><span>电视输入框操作</span><span id="ctrl-state"></span></p>
+  <div class="ctrl">
+    <button data-key="left" aria-label="光标左移">←</button>
+    <button data-key="right" aria-label="光标右移">→</button>
+    <button data-key="backspace" aria-label="退格删除">⌫</button>
+    <button data-key="clear" class="danger" aria-label="清空输入框">清空</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ta = document.getElementById('text');
+  var sendBtn = document.getElementById('send');
+  var dot = document.getElementById('dot');
+  var hint = document.getElementById('hint');
+  var device = document.getElementById('device');
+
+  var remote = { hasInput: true, isPassword: false, deviceName: '', queueSize: 0 };
+  var online = false;
+
+  var ctrlBtns = [].slice.call(document.querySelectorAll('.ctrl button'));
+  var ctrlState = document.getElementById('ctrl-state');
+
+  function setCtrlEnabled(on) {
+    ctrlBtns.forEach(function (b) { b.disabled = !on; });
+    ctrlState.textContent = on ? '' : '不可用';
+  }
+
+  function fireKey(key) {
+    fetch('/api/key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ key: key })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) {
+          setStatus('warn', '没有执行：电视当前没有可操作的输入框');
+          refresh();
+          return;
+        }
+        if (key === 'clear') setStatus('ok', '已清空电视输入框');
+      })
+      .catch(function () {
+        setStatus('warn', '操作失败，连接已断开');
+      });
+  }
+
+  function setStatus(kind, text) {
+    dot.className = 'dot ' + kind;
+    hint.className = 'hint' + (kind === 'warn' ? ' warn' : '');
+    hint.textContent = text;
+  }
+
+  function refresh() {
+    fetch('/api/state', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        online = true;
+        remote = d;
+        dot.className = 'dot ok';
+        device.textContent = d.deviceName || '';
+        if (d.isPassword) {
+          setStatus('warn', '当前是密码输入框，不支持远程写入');
+          sendBtn.disabled = true;
+          setCtrlEnabled(false);
+        } else if (!d.hasInput) {
+          setStatus('warn', '电视当前没有输入框，内容会先暂存，点开输入框后自动填入');
+          sendBtn.disabled = false;
+          setCtrlEnabled(false);
+        } else {
+          setStatus('ok', '已连接电视，可连续发送');
+          sendBtn.disabled = false;
+          setCtrlEnabled(true);
+        }
+      })
+      .catch(function () {
+        online = false;
+        dot.className = 'dot bad';
+        setStatus('warn', '与电视的连接已断开，请确认在同一 Wi-Fi 下');
+        sendBtn.disabled = true;
+        setCtrlEnabled(false);
+      });
+  }
+
+  function send() {
+    var text = ta.value;
+    if (!text) return;
+    sendBtn.disabled = true;
+    fetch('/api/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ text: text })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.ok) {
+          ta.value = '';
+          setStatus('ok', d.mode === 'injected' ? '已写入电视' : '已暂存，点开输入框后自动填入');
+          setTimeout(refresh, 400);
+        } else {
+          setStatus('warn', '发送失败：' + ((d && d.reason) || '未知错误'));
+        }
+      })
+      .catch(function () {
+        setStatus('warn', '发送失败，连接已断开');
+      })
+      .finally(function () {
+        sendBtn.disabled = !online || remote.isPassword;
+      });
+  }
+
+  sendBtn.addEventListener('click', send);
+
+  ctrlBtns.forEach(function (b) {
+    b.addEventListener('click', function () { fireKey(b.dataset.key); });
+  });
+
+  refresh();
+  setInterval(refresh, 3000);
+})();
+</script>
+</body>
+</html>

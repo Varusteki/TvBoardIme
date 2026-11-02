@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TV 跨屏输入法</string>
+    <string name="ime_name">TV 跨屏输入法</string>
+    <string name="subtype_en">英语</string>
+    <string name="subtype_zh">中文</string>
+
+    <!-- 设置页 -->
+    <string name="settings_title">TV 跨屏输入法</string>
+    <string name="settings_step1">第一步：启用输入法</string>
+    <string name="settings_step1_desc">打开后找到「TV 跨屏输入法」，把它的开关打开（部分系统在「管理键盘」里）。</string>
+    <string name="settings_step1_desc_tv">本机设置是两层：打开后按「下」选到「Manage keyboards」（中文系统为「管理键盘」）→ 回车 → 找到「TV 跨屏输入法」按右键勾上。</string>
+    <string name="settings_step1_hint">第一层只列出已启用的键盘，只看到 Gboard 是正常的，必须再进一层。</string>
+    <string name="settings_step2">第二步：切换为当前输入法</string>
+    <string name="settings_step2_desc">在输入框弹出键盘后，用遥控器切换到本输入法</string>
+    <string name="settings_status">状态：%1$s</string>
+    <string name="settings_status_disabled">未启用（系统还不知道有这个键盘）</string>
+    <string name="settings_status_enabled">已启用，但还不是当前输入法</string>
+    <string name="settings_status_current">已启用并选中，可直接使用</string>
+    <string name="settings_test">在此处试打：</string>
+    <string name="settings_test_hint">用遥控器方向键操作下方键盘</string>
+    <string name="settings_pick">选择输入法</string>
+    <string name="settings_enable">打开输入法设置</string>
+    <string name="settings_enable_self">一键启用并选中</string>
+    <string name="settings_enable_self_fail">系统未注册本输入法，请重新安装应用</string>
+    <string name="settings_enable_self_done">已启用并选中，可直接按音量键之外的任意输入框试打</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_about_body">手机与电视连接同一局域网后，扫描键盘右侧二维码即可用手机输入文字或投送文件。</string>
+
+    <!-- 二维码面板 -->
+    <string name="qr_waiting">等待连接</string>
+    <string name="qr_connected">已连接</string>
+    <string name="qr_no_network">未连接网络</string>
+    <string name="qr_starting">正在启动…</string>
+
+    <!-- 键盘 -->
+    <string name="key_space">空格</string>
+    <string name="key_lang">中/En</string>
+    <string name="key_settings">设置</string>
+    <string name="key_backspace">删除</string>
+    <string name="key_shift">大写</string>
+    <string name="key_enter">回车</string>
+</resources>
