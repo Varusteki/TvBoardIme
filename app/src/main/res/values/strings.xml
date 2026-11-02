@@ -25,7 +25,7 @@
     <string name="settings_enable_self_fail">系统未注册本输入法，请重新安装应用</string>
     <string name="settings_enable_self_done">已启用并选中，可直接按音量键之外的任意输入框试打</string>
     <string name="settings_about">关于</string>
-    <string name="settings_about_body">手机与电视连接同一局域网后，扫描键盘右侧二维码即可用手机输入文字或投送文件。</string>
+    <string name="settings_about_body">手机与电视连接同一局域网后，扫描键盘右侧二维码即可用手机输入文字。</string>
 
     <!-- 二维码面板 -->
     <string name="qr_waiting">等待连接</string>
